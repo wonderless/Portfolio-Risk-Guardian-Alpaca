@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timedelta
 
 import pandas as pd
-from alpaca.data.enums import Adjustment
+from alpaca.data.enums import Adjustment, DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
@@ -49,6 +49,13 @@ class AlpacaClient:
         ocurrió, y arruina cualquier cálculo de retornos o indicadores).
         Devuelve un DataFrame ordenado por fecha ascendente con columnas
         open, high, low, close, volume.
+
+        `feed=DataFeed.IEX`: las cuentas paper/gratuitas de Alpaca no tienen
+        habilitado el feed SIP en tiempo real — pedir datos "recientes"
+        (con `end` cerca de `datetime.now()`, como hace `get_recent_bars`)
+        sin especificar el feed puede caer al default SIP y devolver
+        `"subscription does not permit querying recent SIP data"` durante
+        horario de mercado. IEX sí está disponible en el plan gratuito.
         """
         request = StockBarsRequest(
             symbol_or_symbols=symbol,
@@ -56,6 +63,7 @@ class AlpacaClient:
             start=start,
             end=end,
             adjustment=Adjustment.ALL,
+            feed=DataFeed.IEX,
         )
         bars = self.data_client.get_stock_bars(request)
         df = bars.df
