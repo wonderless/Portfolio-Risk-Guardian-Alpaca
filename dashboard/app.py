@@ -180,12 +180,6 @@ def main():
         st.error(str(e))
         st.stop()
 
-    account = client.get_account_info()
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Cash disponible", f"${account['cash']:,.2f}")
-    col2.metric("Equity total", f"${account['equity']:,.2f}")
-    col3.metric("Buying power", f"${account['buying_power']:,.2f}")
-
     if "results" not in st.session_state:
         st.session_state.results = {}
 
@@ -207,6 +201,15 @@ def main():
                     "order_qty": order_qty,
                 })
                 st.session_state.results[symbol] = result
+
+    # Se pide DESPUÉS de procesar 'Analizar' (no antes) para reflejar una
+    # orden recién ejecutada en este mismo rerun — si se pidiera antes,
+    # las métricas quedarían un clic atrasadas respecto a la última orden.
+    account = client.get_account_info()
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Cash disponible", f"${account['cash']:,.2f}")
+    col2.metric("Equity total", f"${account['equity']:,.2f}")
+    col3.metric("Buying power", f"${account['buying_power']:,.2f}")
 
     if not st.session_state.results:
         st.info("Configura los tickers en la barra lateral y presiona 'Analizar' para ver el razonamiento de cada agente.")
