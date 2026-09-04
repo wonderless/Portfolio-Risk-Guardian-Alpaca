@@ -192,6 +192,11 @@ def main():
     if analyze_clicked:
         if not tickers:
             st.warning("Agrega al menos un ticker.")
+        # Cada clic en 'Analizar' reemplaza los resultados anteriores por
+        # los de los tickers actuales — si no, los resultados viejos se
+        # quedaban acumulados abajo del todo (había que scrollear para ver
+        # el análisis más reciente).
+        st.session_state.results = {}
         for symbol in tickers:
             with st.spinner(f"Orquestando {symbol}..."):
                 result = graph.invoke({
